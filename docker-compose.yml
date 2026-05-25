@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: scan_kucing_app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - scan_kucing_net
+
+  web:
+    image: nginx:alpine
+    container_name: scan_kucing_web
+    ports:
+      - "8106:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - app
+    networks:
+      - scan_kucing_net
+
+  db:
+    image: postgres:15
+    container_name: scan_kucing_db
+    environment:
+      POSTGRES_DB: scan_kucing
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5457:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - scan_kucing_net
+
+networks:
+  scan_kucing_net:
+
+volumes:
+  db_data:
