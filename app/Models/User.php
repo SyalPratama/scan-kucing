@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Models;
+use App\Models\RoleUser;
+
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -72,6 +74,19 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'role_user');
+        return $this->belongsToMany(Role::class, 'role_user')
+            ->using(RoleUser::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function catCredit()
+    {
+        return $this->hasOne(CatCredit::class);
     }
 }

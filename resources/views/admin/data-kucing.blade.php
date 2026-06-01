@@ -1,385 +1,398 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('admin.layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Data Kucing - AnabulID</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+@section('title', 'Kelola Data Kucing - Admin AnabulID')
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        catOrange: '#FF9F43',
-                        catSoft: '#FFF4EB',
-                        catDark: '#2D3748'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        /* Custom UI SweetAlert agar membulat serasi dengan tema */
-        .custom-swal-popup {
-            border-radius: 1.5rem !important;
-        }
-    </style>
-</head>
-
-<body class="bg-catSoft text-catDark antialiased min-h-screen">
-
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <div
-            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white p-6 rounded-3xl border border-orange-100 shadow-sm">
-            <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-cat text-catOrange"></i> Data Anabul Kamu
-                </h1>
-                <p class="text-sm text-gray-500 mt-1">Kelola informasi profil dan QR Code pelacak kucing kesayanganmu.
-                </p>
-            </div>
-            <button onclick="openCreateModal()"
-                class="bg-catOrange text-white font-bold text-sm px-5 py-3 rounded-2xl shadow-lg shadow-orange-500/20 hover:bg-amber-600 transition flex items-center gap-2">
-                <i class="fa-solid fa-plus"></i> Tambah Kucing
+@section('content')
+    <div
+        class="mb-8 bg-white p-6 rounded-3xl border border-orange-100 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-cat text-catOrange"></i> Kelola Data Kucing
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">Manajemen data anabul, informasi ras, qr code, serta kepemilikan client
+                AnabulID.</p>
+        </div>
+        <div>
+            <button onclick="toggleModal('modal-add')"
+                class="px-5 py-3 bg-catOrange hover:bg-orange-600 text-white font-medium text-sm rounded-2xl shadow-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> Tambah Kucing Baru
             </button>
         </div>
+    </div>
 
-        @if ($dataKucing->isEmpty())
-            <div class="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm">
-                <div class="text-gray-300 text-6xl mb-3"><i class="fa-solid fa-paw"></i></div>
-                <p class="text-gray-500 font-medium">Belum ada data kucing terdaftar.</p>
-            </div>
-        @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach ($dataKucing as $kucing)
-                    <div
-                        class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative group hover:shadow-md transition">
-                        <div class="flex gap-4 items-start">
-                            <div
-                                class="w-20 h-20 bg-gray-100 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-200">
-                                @if ($kucing->foto)
-                                    <img src="{{ asset($kucing->foto) }}" class="w-full h-full object-cover">
-                                @else
+    <div class="bg-white rounded-3xl border border-orange-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr
+                        class="bg-orange-50/50 border-b border-orange-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <th class="p-5">Foto & Nama</th>
+                        <th class="p-5">Ras / Warna</th>
+                        <th class="p-5">Info Fisik</th>
+                        <th class="p-5">Pemilik & Kontak</th>
+                        <th class="p-5 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm text-gray-600 divide-y divide-gray-50">
+                    @forelse($kucings as $kucing)
+                        <tr class="hover:bg-gray-50/50 transition">
+                            <td class="p-5">
+                                <div class="flex items-center gap-3">
                                     <div
-                                        class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                                        <i class="fa-solid fa-cat text-2xl"></i>
+                                        class="w-12 h-12 rounded-2xl overflow-hidden bg-orange-50 border border-orange-100 flex items-center justify-center flex-shrink-0">
+                                        @if ($kucing->foto)
+                                            <img src="{{ asset($kucing->foto) }}" alt="{{ $kucing->nama_kucing }}"
+                                                class="w-full h-full object-cover">
+                                        @else
+                                            <i class="fa-solid fa-cat text-xl text-orange-300"></i>
+                                        @endif
                                     </div>
-                                @endif
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="font-bold text-lg truncate">{{ $kucing->nama_kucing }}</h3>
-                                <p class="text-xs text-gray-400 capitalize mt-0.5">{{ $kucing->ras ?? 'Ras Campuran' }}
-                                    • {{ $kucing->umur ?? '?' }} Bulan</p>
-                                <span
-                                    class="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide {{ $kucing->jenis_kelamin == 'jantan' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600' }} capitalize">
-                                    <i
-                                        class="fa-solid {{ $kucing->jenis_kelamin == 'jantan' ? 'fa-mars' : 'fa-venus' }} mr-0.5"></i>
-                                    {{ $kucing->jenis_kelamin }}
-                                </span>
-                            </div>
-                        </div>
+                                    <div>
+                                        <div class="font-semibold text-catDark text-base">{{ $kucing->nama_kucing }}</div>
+                                        <div class="text-[10px] text-gray-400 font-mono mt-0.5">
+                                            {{ Str::limit($kucing->id, 8, '') }}</div>
+                                    </div>
+                                </div>
+                            </td>
 
-                        <div class="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
-                            <span class="text-xs text-gray-400 font-medium"><i class="fa-solid fa-qrcode mr-1"></i>
-                                Terlindungi</span>
-                            <div class="flex gap-2">
+                            <td class="p-5">
+                                <div class="font-medium text-gray-700">{{ $kucing->ras }}</div>
+                                <div class="text-xs text-gray-400">{{ $kucing->warna }}</div>
+                            </td>
 
-                                <a href="{{ route('client.data-kucing.download-qr', $kucing->id) }}"
-                                    class="p-2 bg-gray-50 hover:bg-amber-50 text-gray-500 hover:text-amber-600 rounded-xl transition text-xs"
-                                    title="Unduh QR Code">
-                                    <i class="fa-solid fa-download mr-1"></i> QR
-                                </a>
-                                <!-- TOMBOL BARU: Lihat Tampilan Halaman QR Publik -->
-                                <a href="{{ route('kucing.public-profile', $kucing->qr_code) }}" target="_blank"
-                                    class="p-2 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 rounded-xl transition text-xs"
-                                    title="Lihat Halaman QR">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
+                            <td class="p-5">
+                                <div class="flex flex-wrap gap-1 mb-1">
+                                    <span
+                                        class="px-2 py-0.5 text-[11px] font-medium rounded-md bg-orange-50 text-catOrange border border-orange-100">
+                                        {{ $kucing->umur }}
+                                    </span>
+                                    <span
+                                        class="px-2 py-0.5 text-[11px] font-medium rounded-md {{ $kucing->jenis_kelamin == 'jantan' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-pink-50 text-pink-600 border border-pink-100' }}">
+                                        <i
+                                            class="fa-solid {{ $kucing->jenis_kelamin == 'jantan' ? 'fa-mars' : 'fa-venus' }} mr-0.5"></i>{{ $kucing->jenis_kelamin }}
+                                    </span>
+                                </div>
+                                <div class="text-xs text-gray-400 italic max-w-[180px] truncate"
+                                    title="{{ $kucing->ciri_khusus }}">
+                                    {{ $kucing->ciri_khusus ?? '-' }}
+                                </div>
+                            </td>
 
-                                <button onclick="openEditModal(this)" data-id="{{ $kucing->id }}"
-                                    data-nama="{{ $kucing->nama_kucing }}" data-ras="{{ $kucing->ras }}"
-                                    data-umur="{{ $kucing->umur }}" data-gender="{{ $kucing->jenis_kelamin }}"
-                                    data-warna="{{ $kucing->warna }}" data-ciri="{{ $kucing->ciri_khusus }}"
-                                    data-alamat="{{ $kucing->alamat_pemilik }}" data-hp="{{ $kucing->nomor_hp }}"
-                                    class="p-2 bg-gray-50 hover:bg-orange-50 text-gray-500 hover:text-catOrange rounded-xl transition text-xs"
-                                    title="Edit Data">
-                                    <i class="fa-solid fa-pen-to-square"></i>
+                            <td class="p-5">
+                                <div class="font-medium text-gray-700 flex items-center gap-1">
+                                    <i class="fa-solid fa-user text-xs text-gray-400"></i>
+                                    {{ $kucing->user->name ?? 'Tanpa Pemilik' }}
+                                </div>
+                                <div class="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                    <i class="fa-solid fa-phone text-[10px]"></i> {{ $kucing->nomor_hp }}
+                                </div>
+                            </td>
+
+                            <td class="p-5 flex items-center justify-center gap-2 mt-2">
+                                <button onclick="openEditModal({{ json_encode($kucing) }})"
+                                    class="w-9 h-9 bg-gray-50 hover:bg-orange-50 text-gray-500 hover:text-catOrange rounded-xl border border-gray-100 transition flex items-center justify-center">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </button>
+
+                                <button onclick="handleDelete('{{ $kucing->id }}')"
+                                    class="w-9 h-9 bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-xl border border-gray-100 transition flex items-center justify-center">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
                                 </button>
 
                                 <form id="delete-form-{{ $kucing->id }}"
-                                    action="{{ route('client.data-kucing.destroy', $kucing->id) }}" method="POST"
+                                    action="{{ route('admin.data-kucing.destroy', $kucing->id) }}" method="POST"
                                     class="hidden">
-                                    @csrf @method('DELETE')
+                                    @csrf
+                                    @method('DELETE')
                                 </form>
-                                <button type="button"
-                                    onclick="confirmDelete('{{ $kucing->id }}', '{{ $kucing->nama_kucing }}')"
-                                    class="p-2 bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-xl transition text-xs"
-                                    title="Hapus">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="p-10 text-center text-gray-400">Belum ada data kucing terdaftar.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="p-5 border-t border-gray-50">
+            {{ $kucings->links() }}
+        </div>
     </div>
 
-    <div id="modalCreate"
-        class="fixed inset-0 bg-catDark/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-5">
-                <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-paw text-catOrange"></i>
-                    Tambah Anabul Baru</h2>
-                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600"><i
-                        class="fa-solid fa-xmark text-lg"></i></button>
+    <div id="modal-add"
+        class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+            class="bg-white rounded-3xl border border-gray-100 shadow-xl max-w-2xl w-full overflow-hidden transform transition-all">
+            <div class="p-6 border-b border-gray-50 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-catDark"><i class="fa-solid fa-plus text-catOrange mr-1"></i> Tambah Data
+                    Kucing</h3>
+                <button onclick="toggleModal('modal-add')" class="text-gray-400 hover:text-gray-600"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
-            <form action="{{ route('client.data-kucing.store') }}" method="POST" enctype="multipart/form-data"
-                class="space-y-4">
+            <form action="{{ route('admin.data-kucing.store') }}" method="POST" enctype="multipart/form-data"
+                class="p-6 space-y-4 max-h-[75vh] overflow-y-auto style-scrollbar">
                 @csrf
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Nama Kucing *</label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nama Kucing</label>
                         <input type="text" name="nama_kucing" required
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Ras</label>
-                        <input type="text" name="ras" placeholder="Persia, Anggora..."
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Umur (Bulan)</label>
-                        <input type="number" name="umur"
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Jenis Kelamin</label>
-                        <select name="jenis_kelamin"
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
-                            <option value="">Pilih</option>
-                            <option value="jantan">Jantan</option>
-                            <option value="betina">Betina</option>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pilih Pemilik (User)</label>
+                        <select name="user_id" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition bg-white">
+                            <option value="">-- Pilih Akun Pemilik --</option>
+                            @foreach ($users as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Warna Bulu</label>
-                        <input type="text" name="warna" placeholder="Oren, Putih, Calico..."
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Ras Kucing</label>
+                        <input type="text" name="ras" placeholder="Contoh: Persia" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">No. HP Pemilik</label>
-                        <input type="text" name="nomor_hp" placeholder="0812..."
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Umur</label>
+                        <input type="text" name="umur" placeholder="Contoh: 1 Tahun" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Jenis Kelamin</label>
+                        <select name="jenis_kelamin" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition bg-white">
+                            <option value="Jantan">Jantan</option>
+                            <option value="Betina">Betina</option>
+                        </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1">Ciri Khusus</label>
-                    <textarea name="ciri_khusus" rows="2" placeholder="Ekor bengkok, ada tompel hitam di hidung..."
-                        class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none"></textarea>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Warna Bulu</label>
+                        <input type="text" name="warna" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nomor HP/WhatsApp</label>
+                        <input type="text" name="nomor_hp" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
+                    </div>
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1">Alamat Pemilik</label>
-                    <textarea name="alamat_pemilik" rows="2"
-                        class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none"></textarea>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Ciri Khusus</label>
+                    <input type="text" name="ciri_khusus" placeholder="Misal: ekor bengkok, mata biru sebelah"
+                        class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1">Foto Kucing</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Alamat Pemilik</label>
+                    <textarea name="alamat_pemilik" required rows="2"
+                        class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto Anabul</label>
                     <input type="file" name="foto" accept="image/*"
-                        class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-catOrange hover:file:bg-orange-100">
+                        class="w-full px-4 py-2.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-catOrange hover:file:bg-orange-100 cursor-pointer">
                 </div>
-                <div class="pt-2 flex gap-3 justify-end">
-                    <button type="button" onclick="closeCreateModal()"
-                        class="px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-xl transition">Batal</button>
+
+                <div class="pt-4 flex justify-end gap-3 border-t border-gray-50">
+                    <button type="button" onclick="toggleModal('modal-add')"
+                        class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-500 font-medium text-sm rounded-2xl transition">Batal</button>
                     <button type="submit"
-                        class="px-5 py-2.5 bg-catOrange text-white font-bold text-sm rounded-xl hover:bg-amber-600 shadow-md transition">Simpan
-                        Data</button>
+                        class="px-5 py-3 bg-catOrange hover:bg-orange-600 text-white font-medium text-sm rounded-2xl transition shadow-sm">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="modalEdit"
-        class="fixed inset-0 bg-catDark/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-5">
-                <h2 class="text-lg font-bold flex items-center gap-2"><i
-                        class="fa-solid fa-pen-to-square text-catOrange"></i> Ubah Data Anabul</h2>
-                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600"><i
-                        class="fa-solid fa-xmark text-lg"></i></button>
+    <div id="modal-edit"
+        class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+            class="bg-white rounded-3xl border border-gray-100 shadow-xl max-w-2xl w-full overflow-hidden transform transition-all">
+            <div class="p-6 border-b border-gray-50 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-catDark"><i class="fa-solid fa-cat text-catOrange mr-1"></i> Edit Data
+                    Kucing</h3>
+                <button onclick="toggleModal('modal-edit')" class="text-gray-400 hover:text-gray-600"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
-            <form id="formEdit" method="POST" enctype="multipart/form-data" class="space-y-4">
-                @csrf @method('PUT')
-                <div class="grid grid-cols-2 gap-4">
+            <form id="form-edit" method="POST" enctype="multipart/form-data"
+                class="p-6 space-y-4 max-h-[75vh] overflow-y-auto style-scrollbar">
+                @csrf
+                @method('PUT')
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Nama Kucing *</label>
-                        <input type="text" id="edit_nama" name="nama_kucing" required
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nama Kucing</label>
+                        <input type="text" id="edit-nama-kucing" name="nama_kucing" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Ras</label>
-                        <input type="text" id="edit_ras" name="ras"
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Umur (Bulan)</label>
-                        <input type="number" id="edit_umur" name="umur"
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Jenis Kelamin</label>
-                        <select id="edit_gender" name="jenis_kelamin"
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
-                            <option value="">Pilih</option>
-                            <option value="jantan">Jantan</option>
-                            <option value="betina">Betina</option>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pilih Pemilik (User)</label>
+                        <select id="edit-user-id" name="user_id" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition bg-white">
+                            @foreach ($users as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Warna Bulu</label>
-                        <input type="text" id="edit_warna" name="warna"
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Ras Kucing</label>
+                        <input type="text" id="edit-ras" name="ras" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">No. HP Pemilik</label>
-                        <input type="text" id="edit_hp" name="nomor_hp"
-                            class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Umur</label>
+                        <input type="text" id="edit-umur" name="umur" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Jenis Kelamin</label>
+                        <select id="edit-jenis-kelamin" name="jenis_kelamin" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition bg-white">
+                            <option value="Jantan">Jantan</option>
+                            <option value="Betina">Betina</option>
+                        </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1">Ciri Khusus</label>
-                    <textarea id="edit_ciri" name="ciri_khusus" rows="2"
-                        class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none"></textarea>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Warna Bulu</label>
+                        <input type="text" id="edit-warna" name="warna" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nomor HP/WhatsApp</label>
+                        <input type="text" id="edit-nomor-hp" name="nomor_hp" required
+                            class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
+                    </div>
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1">Alamat Pemilik</label>
-                    <textarea id="edit_alamat" name="alamat_pemilik" rows="2"
-                        class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm focus:border-catOrange focus:outline-none"></textarea>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Ciri Khusus</label>
+                    <input type="text" id="edit-ciri-khusus" name="ciri_khusus"
+                        class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition">
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1">Foto Kucing (Biarkan kosong jika tidak
-                        diganti)</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Alamat Pemilik</label>
+                    <textarea id="edit-alamat-pemilik" name="alamat_pemilik" required rows="2"
+                        class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Ubah Foto <span
+                            class="text-[10px] text-gray-400 italic">(Kosongkan jika tidak diganti)</span></label>
                     <input type="file" name="foto" accept="image/*"
-                        class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-catOrange hover:file:bg-orange-100">
+                        class="w-full px-4 py-2.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-catOrange transition file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-catOrange hover:file:bg-orange-100 cursor-pointer">
                 </div>
-                <div class="pt-2 flex gap-3 justify-end">
-                    <button type="button" onclick="closeEditModal()"
-                        class="px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-xl transition">Batal</button>
+
+                <div class="pt-4 flex justify-end gap-3 border-t border-gray-50">
+                    <button type="button" onclick="toggleModal('modal-edit')"
+                        class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-500 font-medium text-sm rounded-2xl transition">Batal</button>
                     <button type="submit"
-                        class="px-5 py-2.5 bg-catOrange text-white font-bold text-sm rounded-xl hover:bg-amber-600 shadow-md transition">Simpan
+                        class="px-5 py-3 bg-catOrange hover:bg-orange-600 text-white font-medium text-sm rounded-2xl transition shadow-sm">Simpan
                         Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        const modalCreate = document.getElementById('modalCreate');
-        const modalEdit = document.getElementById('modalEdit');
-        const formEdit = document.getElementById('formEdit');
-
-        function openCreateModal() {
-            modalCreate.classList.remove('hidden');
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.toggle('hidden');
         }
 
-        function closeCreateModal() {
-            modalCreate.classList.add('hidden');
+        function openEditModal(kucing) {
+            document.getElementById('form-edit').action = `/admin/data-kucing/${kucing.id}`;
+
+            document.getElementById('edit-nama-kucing').value = kucing.nama_kucing;
+            document.getElementById('edit-user-id').value = kucing.user_id;
+            document.getElementById('edit-ras').value = kucing.ras;
+            document.getElementById('edit-umur').value = kucing.umur;
+            document.getElementById('edit-jenis-kelamin').value = kucing.jenis_kelamin;
+            document.getElementById('edit-warna').value = kucing.warna;
+            document.getElementById('edit-nomor-hp').value = kucing.nomor_hp;
+            document.getElementById('edit-ciri-khusus').value = kucing.ciri_khusus || '';
+            document.getElementById('edit-alamat-pemilik').value = kucing.alamat_pemilik;
+
+            toggleModal('modal-edit');
         }
 
-        function openEditModal(button) {
-            const id = button.getAttribute('data-id');
-            formEdit.action = `/client/data-kucing/update/${id}`;
-
-            document.getElementById('edit_nama').value = button.getAttribute('data-nama');
-            document.getElementById('edit_ras').value = button.getAttribute('data-ras');
-            document.getElementById('edit_umur').value = button.getAttribute('data-umur');
-            document.getElementById('edit_gender').value = button.getAttribute('data-gender');
-            document.getElementById('edit_warna').value = button.getAttribute('data-warna');
-            document.getElementById('edit_hp').value = button.getAttribute('data-hp');
-            document.getElementById('edit_ciri').value = button.getAttribute('data-ciri');
-            document.getElementById('edit_alamat').value = button.getAttribute('data-alamat');
-
-            modalEdit.classList.remove('hidden');
-        }
-
-        function closeEditModal() {
-            modalEdit.classList.add('hidden');
-        }
-    </script>
-
-
-    <script>
-        // 1. Alert Sukses saat Berhasil Tambah/Edit/Hapus Data
-        @if (session('success'))
+        function handleDelete(kucingId) {
             Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                confirmButtonColor: '#FF9F43',
-                customClass: {
-                    popup: 'custom-swal-popup'
-                }
-            });
-        @endif
-
-        // 2. Alert Gagal saat Terjadi Error Validasi Input dari Laravel
-        @if ($errors->any())
-            Swal.fire({
-                icon: 'error',
-                title: 'Opps.. Terjadi Kesalahan',
-                html: `<ul class="text-left text-xs list-disc list-inside pl-2 space-y-1 text-gray-600">
-                        @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach
-                       </ul>`,
-                confirmButtonColor: '#FF9F43',
-                customClass: {
-                    popup: 'custom-swal-popup'
-                }
-            });
-        @endif
-
-        // 3. Konfirmasi Hapus Data Interaktif
-        function confirmDelete(id, name) {
-            Swal.fire({
-                title: 'Hapus Anabul?',
-                text: `Apakah kamu yakin ingin menghapus data si "${name}"? Data tidak dapat dikembalikan!`,
+                title: 'Hapus Data Kucing?',
+                text: "Tindakan ini permanen. Seluruh riwayat data serta sistem integrasi QR Code anabul terkait akan dihapus.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#EF4444',
-                cancelButtonColor: '#6B7280',
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#ef4444',
                 confirmButtonText: 'Ya, Hapus!',
                 cancelButtonText: 'Batal',
                 customClass: {
-                    popup: 'custom-swal-popup'
+                    popup: 'rounded-3xl border border-gray-100',
+                    confirmButton: 'px-5 py-2.5 rounded-xl text-xs font-semibold',
+                    cancelButton: 'px-5 py-2.5 rounded-xl text-xs font-semibold'
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Trigger submit form penyamaran jika user klik "Ya, Hapus!"
-                    document.getElementById(`delete-form-${id}`).submit();
+                    document.getElementById(`delete-form-${kucingId}`).submit();
                 }
-            });
+            })
         }
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        @if (session('success'))
+            Toast.fire({
+                icon: 'success',
+                title: "{{ session('success') }}"
+            });
+        @endif
+
+        @if (session('error') || $errors->any())
+            Toast.fire({
+                icon: 'error',
+                title: "{{ session('error') ?? 'Periksa kembali kelengkapan formulir Anda.' }}"
+            });
+        @endif
     </script>
 
-</body>
+    <style>
+        .style-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
 
-</html>
+        .style-scrollbar::-webkit-scrollbar-track {
+            background: #f9fafb;
+        }
+
+        .style-scrollbar::-webkit-scrollbar-thumb {
+            background: #fed7aa;
+            border-radius: 20px;
+        }
+    </style>
+@endsection

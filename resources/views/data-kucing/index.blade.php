@@ -1,134 +1,111 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.client')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Data Kucing - AnabulID</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+@section('title', 'Manajemen Data Kucing - AnabulID')
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        catOrange: '#FF9F43',
-                        catSoft: '#FFF4EB',
-                        catDark: '#2D3748'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        /* Custom UI SweetAlert agar membulat serasi dengan tema */
-        .custom-swal-popup {
-            border-radius: 1.5rem !important;
-        }
-    </style>
-</head>
-
-<body class="bg-catSoft text-catDark antialiased min-h-screen">
-
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <div
-            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white p-6 rounded-3xl border border-orange-100 shadow-sm">
-            <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-cat text-catOrange"></i> Data Anabul Kamu
-                </h1>
-                <p class="text-sm text-gray-500 mt-1">Kelola informasi profil dan QR Code pelacak kucing kesayanganmu.</p>
-            </div>
-            
-            <div>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-                    @csrf
-                </form>
-                <button onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                    class="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-sm px-5 py-3 rounded-2xl border border-red-100 transition flex items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-right-from-bracket"></i> Keluar
-                </button>
-            </div>
+@section('content')
+    <!-- Top Bar Info -->
+    <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white p-6 rounded-3xl border border-orange-100 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-cat text-catOrange"></i> Data Anabul Kamu
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">Kelola informasi profil dan QR Code pelacak kucing kesayanganmu.</p>
         </div>
-
-        @if ($dataKucing->isEmpty())
-            <div class="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm">
-                <div class="text-gray-300 text-6xl mb-3"><i class="fa-solid fa-paw"></i></div>
-                <p class="text-gray-500 font-medium">Belum ada data kucing terdaftar.</p>
-            </div>
-        @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach ($dataKucing as $kucing)
-                    <div
-                        class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative group hover:shadow-md transition">
-                        <div class="flex gap-4 items-start">
-                            <div
-                                class="w-20 h-20 bg-gray-100 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-200">
-                                @if ($kucing->foto)
-                                    <img src="{{ asset($kucing->foto) }}" class="w-full h-full object-cover">
-                                @else
-                                    <div
-                                        class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                                        <i class="fa-solid fa-cat text-2xl"></i>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="font-bold text-lg truncate">{{ $kucing->nama_kucing }}</h3>
-                                <p class="text-xs text-gray-400 capitalize mt-0.5">{{ $kucing->ras ?? 'Ras Campuran' }}
-                                    • {{ $kucing->umur ?? '?' }} Bulan</p>
-                                <span
-                                    class="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide {{ $kucing->jenis_kelamin == 'jantan' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600' }} capitalize">
-                                    <i
-                                        class="fa-solid {{ $kucing->jenis_kelamin == 'jantan' ? 'fa-mars' : 'fa-venus' }} mr-0.5"></i>
-                                    {{ $kucing->jenis_kelamin }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
-                            <span class="text-xs text-gray-400 font-medium"><i class="fa-solid fa-qrcode mr-1"></i>
-                                Terlindungi</span>
-                            <div class="flex gap-2">
-
-                                <a href="{{ route('client.data-kucing.download-qr', $kucing->id) }}"
-                                    class="p-2 bg-gray-50 hover:bg-amber-50 text-gray-500 hover:text-amber-600 rounded-xl transition text-xs"
-                                    title="Unduh QR Code">
-                                    <i class="fa-solid fa-download mr-1"></i> QR
-                                </a>
-
-                                <a href="{{ route('kucing.public-profile', $kucing->qr_code) }}" target="_blank"
-                                    class="p-2 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 rounded-xl transition text-xs"
-                                    title="Lihat Halaman QR">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
-
-                                <button onclick="openEditModal(this)" data-id="{{ $kucing->id }}"
-                                    data-nama="{{ $kucing->nama_kucing }}" data-ras="{{ $kucing->ras }}"
-                                    data-umur="{{ $kucing->umur }}" data-gender="{{ $kucing->jenis_kelamin }}"
-                                    data-warna="{{ $kucing->warna }}" data-ciri="{{ $kucing->ciri_khusus }}"
-                                    data-alamat="{{ $kucing->alamat_pemilik }}" data-hp="{{ $kucing->nomor_hp }}"
-                                    class="p-2 bg-gray-50 hover:bg-orange-50 text-gray-500 hover:text-catOrange rounded-xl transition text-xs"
-                                    title="Edit Data">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
     </div>
 
+    <!-- Banner Slot Kredit -->
+    <div class="bg-gradient-to-r from-catOrange to-amber-500 text-white rounded-3xl p-6 mb-8 shadow-lg">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <p class="text-white/80 text-sm">Slot Kucing Tersedia</p>
+                <h2 class="text-4xl font-bold mt-1">{{ $catCredit->credits }}</h2>
+                <p class="text-white/90 text-sm mt-2">1 slot digunakan untuk menambahkan 1 data kucing baru.</p>
+            </div>
+
+            <div class="flex gap-3">
+                <a href="{{ route('client.payment.checkout') }}"
+                    class="bg-white text-catOrange font-bold px-5 py-3 rounded-2xl hover:bg-orange-50 transition flex items-center gap-2">
+                    <i class="fa-solid fa-wallet"></i> Beli Slot
+                </a>
+
+                @if ($catCredit->credits > 0)
+                    <a href="#"
+                        class="bg-white/20 backdrop-blur border border-white/30 text-white font-bold px-5 py-3 rounded-2xl hover:bg-white/30 transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Kucing
+                    </a>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- List Data Kucing -->
+    @if ($dataKucing->isEmpty())
+        <div class="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm">
+            <div class="text-gray-300 text-6xl mb-3"><i class="fa-solid fa-paw"></i></div>
+            <p class="text-gray-500 font-medium">Belum ada data kucing terdaftar.</p>
+        </div>
+    @else
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach ($dataKucing as $kucing)
+                <div
+                    class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative group hover:shadow-md transition">
+                    <div class="flex gap-4 items-start">
+                        <div class="w-20 h-20 bg-gray-100 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-200">
+                            @if ($kucing->foto)
+                                <img src="{{ asset($kucing->foto) }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                                    <i class="fa-solid fa-cat text-2xl"></i>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-lg truncate">{{ $kucing->nama_kucing }}</h3>
+                            <p class="text-xs text-gray-400 capitalize mt-0.5">{{ $kucing->ras ?? 'Ras Campuran' }} •
+                                {{ $kucing->umur ?? '?' }} Bulan</p>
+                            <span
+                                class="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide {{ $kucing->jenis_kelamin == 'jantan' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600' }} capitalize">
+                                <i
+                                    class="fa-solid {{ $kucing->jenis_kelamin == 'jantan' ? 'fa-mars' : 'fa-venus' }} mr-0.5"></i>
+                                {{ $kucing->jenis_kelamin }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
+                        <span class="text-xs text-gray-400 font-medium"><i class="fa-solid fa-qrcode mr-1"></i>
+                            Terlindungi</span>
+                        <div class="flex gap-2">
+                            <a href="{{ route('client.data-kucing.download-qr', $kucing->id) }}"
+                                class="p-2 bg-gray-50 hover:bg-amber-50 text-gray-500 hover:text-amber-600 rounded-xl transition text-xs"
+                                title="Unduh QR Code">
+                                <i class="fa-solid fa-download mr-1"></i> QR
+                            </a>
+
+                            <a href="{{ route('kucing.public-profile', $kucing->qr_code) }}" target="_blank"
+                                class="p-2 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 rounded-xl transition text-xs"
+                                title="Lihat Halaman QR">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+
+                            <button onclick="openEditModal(this)" data-id="{{ $kucing->id }}"
+                                data-nama="{{ $kucing->nama_kucing }}" data-ras="{{ $kucing->ras }}"
+                                data-umur="{{ $kucing->umur }}" data-gender="{{ $kucing->jenis_kelamin }}"
+                                data-warna="{{ $kucing->warna }}" data-ciri="{{ $kucing->ciri_khusus }}"
+                                data-alamat="{{ $kucing->alamat_pemilik }}" data-hp="{{ $kucing->nomor_hp }}"
+                                class="p-2 bg-gray-50 hover:bg-orange-50 text-gray-500 hover:text-catOrange rounded-xl transition text-xs"
+                                title="Edit Data">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
+    <!-- MODAL EDIT -->
     <div id="modalEdit"
         class="fixed inset-0 bg-catDark/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
@@ -206,7 +183,9 @@
             </form>
         </div>
     </div>
+@endsection
 
+@section('scripts')
     <script>
         const modalEdit = document.getElementById('modalEdit');
         const formEdit = document.getElementById('formEdit');
@@ -230,10 +209,8 @@
         function closeEditModal() {
             modalEdit.classList.add('hidden');
         }
-    </script>
 
-    <script>
-        // 1. Alert Sukses saat Berhasil Edit Data
+        // Alert Notifikasi Sukses
         @if (session('success'))
             Swal.fire({
                 icon: 'success',
@@ -246,7 +223,7 @@
             });
         @endif
 
-        // 2. Alert Gagal saat Terjadi Error Validasi Input dari Laravel
+        // Alert Notifikasi Error Validasi
         @if ($errors->any())
             Swal.fire({
                 icon: 'error',
@@ -261,7 +238,4 @@
             });
         @endif
     </script>
-
-</body>
-
-</html>
+@endsection

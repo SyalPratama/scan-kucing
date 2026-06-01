@@ -21,7 +21,7 @@
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -31,6 +31,7 @@
 
 <body class="bg-catSoft text-catDark antialiased">
 
+    <!-- HEADER -->
     <header class="container mx-auto px-6 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-2">
             <div class="bg-catOrange p-2 rounded-xl text-white">
@@ -42,7 +43,7 @@
         <nav class="hidden md:flex space-x-8 font-medium text-sm text-gray-600">
             <a href="#fitur" class="hover:text-catOrange transition">Fitur</a>
             <a href="#cara-kerja" class="hover:text-catOrange transition">Cara Kerja</a>
-            <a href="#testimoni" class="hover:text-catOrange transition">Testimoni</a>
+            <a href="#harga" class="hover:text-catOrange transition">Harga Slot</a>
         </nav>
         <button
             class="bg-catDark text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-opacity-90 transition shadow-sm">
@@ -50,6 +51,7 @@
         </button>
     </header>
 
+    <!-- HERO SECTION -->
     <main class="container mx-auto px-6 pt-12 pb-24 flex flex-col-reverse lg:flex-row items-center gap-12">
         <div class="w-full lg:w-1/2 space-y-6 text-center lg:text-left">
             <div
@@ -70,10 +72,10 @@
                     <i data-lucide="qr-code" class="w-5 h-5 group-hover:scale-110 transition"></i>
                     <span>Coba Demo Scan</span>
                 </button>
-                <button
+                <a href="#harga"
                     class="flex items-center justify-center space-x-2 bg-white border-2 border-gray-200 text-catDark px-8 py-4 rounded-2xl font-bold text-base hover:border-catOrange transition">
-                    <span>Daftarkan Kucing</span>
-                </button>
+                    <span>Pilih Paket Harga</span>
+                </a>
             </div>
 
             <div class="grid grid-cols-3 gap-4 pt-8 border-t border-orange-200/50 max-w-md mx-auto lg:mx-0">
@@ -138,6 +140,164 @@
             </div>
         </div>
     </main>
+
+    <!-- PRICING SECTION -->
+    <section id="harga" class="bg-white/60 backdrop-blur-md py-20 border-t border-orange-100/60">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span
+                    class="text-catOrange bg-orange-100 text-xs font-bold tracking-wider uppercase px-4 py-1.5 rounded-full">
+                    Pilihan Paket Terbaik
+                </span>
+                <h2 class="text-3xl md:text-4xl font-extrabold mt-3 tracking-tight">
+                    Investasi Terbaik Untuk <span class="text-catOrange">Keamanan Si Meong</span>
+                </h2>
+                <p class="text-gray-500 mt-3 font-medium">
+                    Pilih paket slot sesuai dengan jumlah populasi anabul di rumah Anda. 1 slot berlaku selamanya untuk
+                    1 data kucing.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
+                @foreach ($packages as $package)
+                    <div
+                        class="bg-white rounded-3xl p-8 flex flex-col justify-between transition duration-300 hover:shadow-xl hover:-translate-y-1 relative
+                        {{ $package->badge ? 'shadow-xl border-2 border-catOrange scale-105 z-10' : 'shadow-md border border-gray-100/80' }}">
+
+                        @if ($package->badge)
+                            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+                                <span
+                                    class="bg-gradient-to-r from-catOrange to-amber-500 text-white px-4 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider shadow-sm whitespace-nowrap block">
+                                    {{ $package->badge }}
+                                </span>
+                            </div>
+                        @endif
+
+                        <div>
+                            <h3 class="font-bold text-xl text-slate-800 {{ $package->badge ? 'mt-2' : '' }}">
+                                {{ $package->name }}
+                            </h3>
+
+                            <div class="mt-4 flex items-baseline">
+                                <span class="text-4xl font-extrabold tracking-tight text-slate-900">
+                                    {{ $package->slots }}
+                                </span>
+                                <span class="text-lg font-semibold text-gray-400 ml-1">Slot Kucing</span>
+                            </div>
+
+                            <p class="text-2xl font-extrabold text-catOrange mt-2">
+                                Rp{{ number_format($package->price, 0, ',', '.') }}
+                            </p>
+
+                            @if ($package->slots > 1)
+                                @php
+                                    // Asumsi harga dasar per 1 slot adalah Rp30.000
+                                    $hargaNormal = $package->slots * 30000;
+                                    $totalHemat = $hargaNormal - $package->price;
+                                @endphp
+                                @if ($totalHemat > 0)
+                                    <p
+                                        class="text-xs text-emerald-600 font-semibold mt-1 bg-emerald-50 px-2 py-0.5 rounded-md inline-block">
+                                        Hemat Rp{{ number_format($totalHemat, 0, ',', '.') }}!
+                                    </p>
+                                @endif
+                            @endif
+
+                            <ul class="mt-8 space-y-4 text-sm text-gray-500">
+                                <li class="flex items-center gap-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 flex-shrink-0"></i>
+                                    <span>Simpan {{ $package->slots == 1 ? '1' : 'hingga ' . $package->slots }} data
+                                        identitas kucing</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 flex-shrink-0"></i>
+                                    <span>Unduh QR Code siap cetak</span>
+                                </li>
+                                @if ($package->slots >= 3)
+                                    <li class="flex items-center gap-3">
+                                        <i data-lucide="check-circle-2"
+                                            class="w-5 h-5 text-emerald-500 flex-shrink-0"></i>
+                                        <span>Prioritas dukungan CS 24/7</span>
+                                    </li>
+                                @endif
+                            </ul>
+                        </div>
+
+                        <div class="mt-8">
+                            <a href="{{ route('login', ['package' => $package->id]) }}"
+                                class="block w-full text-center py-3.5 px-4 rounded-2xl font-bold transition 
+                                {{ $package->badge ? 'bg-gradient-to-r from-catOrange to-amber-500 text-white font-extrabold shadow-md shadow-orange-500/10 hover:opacity-90' : 'bg-catDark hover:bg-opacity-90 text-white' }}">
+                                Beli Sekarang
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-catDark text-white/90 pt-16 pb-8 border-t border-slate-700/50">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2 text-white">
+                        <div class="bg-catOrange p-2 rounded-xl">
+                            <i data-lucide="cat" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold tracking-tight">Anabul<span
+                                class="text-catOrange">ID</span></span>
+                    </div>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        Memberikan rasa aman ekstra bagi pemilik hewan melalui sistem pelacakan informasi QR Code yang
+                        andal dan mudah diakses.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-base text-white mb-4">Tautan Navigasi</h4>
+                    <ul class="space-y-2.5 text-sm text-gray-400">
+                        <li><a href="#fitur" class="hover:text-catOrange transition">Fitur Layanan</a></li>
+                        <li><a href="#cara-kerja" class="hover:text-catOrange transition">Cara Kerja Sistem</a></li>
+                        <li><a href="#harga" class="hover:text-catOrange transition">Pricings & Slot</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-base text-white mb-4">Kontak & Support</h4>
+                    <ul class="space-y-2.5 text-sm text-gray-400">
+                        <li class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-catOrange"></i>
+                            support@anabul.id</li>
+                        <li class="flex items-center gap-2"><i data-lucide="phone"
+                                class="w-4 h-4 text-catOrange"></i> +62 812-3456-7890</li>
+                        <li class="flex items-center gap-2"><i data-lucide="map-pin"
+                                class="w-4 h-4 text-catOrange"></i> Jakarta, Indonesia</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-base text-white mb-4">Media Sosial</h4>
+                    <div class="flex space-x-4">
+                        <a href="#"
+                            class="p-2.5 bg-slate-700/50 hover:bg-catOrange text-white rounded-xl transition"><i
+                                data-lucide="instagram" class="w-5 h-5"></i></a>
+                        <a href="#"
+                            class="p-2.5 bg-slate-700/50 hover:bg-catOrange text-white rounded-xl transition"><i
+                                data-lucide="twitter" class="w-5 h-5"></i></a>
+                        <a href="#"
+                            class="p-2.5 bg-slate-700/50 hover:bg-catOrange text-white rounded-xl transition"><i
+                                data-lucide="facebook" class="w-5 h-5"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="border-t border-slate-700/50 pt-8 flex flex-col sm:flex-row justify-between items-center text-xs text-gray-400 gap-4">
+                <p>&copy; 2026 AnabulID. Hak Cipta Dilindungi.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-white transition">Kebijakan Privasi</a>
+                    <a href="#" class="hover:text-white transition">Syarat & Ketentuan</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script>
         lucide.createIcons();

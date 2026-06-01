@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use App\Models\RoleUser;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,6 +48,9 @@ class Role extends Model
             'role_user',
             'role_id',
             'user_id'
-        );
+        )
+        ->using(RoleUser::class)
+        ->withPivot('id')
+        ->withTimestamps();
     }
 }

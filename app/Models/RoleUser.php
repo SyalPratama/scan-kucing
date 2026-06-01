@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
-class RoleUser extends Model
+class RoleUser extends Pivot
 {
     use HasFactory;
 
@@ -22,9 +22,6 @@ class RoleUser extends Model
         'role_id',
     ];
 
-    /**
-     * Boot UUID
-     */
     protected static function boot()
     {
         parent::boot();
@@ -37,17 +34,11 @@ class RoleUser extends Model
         });
     }
 
-    /**
-     * Relation user
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relation role
-     */
     public function role()
     {
         return $this->belongsTo(Role::class);
