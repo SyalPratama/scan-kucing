@@ -265,11 +265,11 @@
                     <h4 class="font-bold text-base text-white mb-4">Kontak & Support</h4>
                     <ul class="space-y-2.5 text-sm text-gray-400">
                         <li class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-catOrange"></i>
-                            support@anabul.id</li>
+                            syalpratamaa@gmail.com</li>
                         <li class="flex items-center gap-2"><i data-lucide="phone"
-                                class="w-4 h-4 text-catOrange"></i> +62 812-3456-7890</li>
+                                class="w-4 h-4 text-catOrange"></i> +62 838-4488-2339</li>
                         <li class="flex items-center gap-2"><i data-lucide="map-pin"
-                                class="w-4 h-4 text-catOrange"></i> Jakarta, Indonesia</li>
+                                class="w-4 h-4 text-catOrange"></i> Majalengka, Indonesia</li>
                     </ul>
                 </div>
                 <div>
